@@ -3,7 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <title>TechStore - Sua loja de tecnologia</title>
-   <link rel="stylesheet" href="techstore.css">
+    <link rel="stylesheet" href="techstore.css">
+    <style>
+        .products {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .product {
+            flex: 1 1 30%;
+            box-sizing: border-box;
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -20,7 +31,7 @@
     <div class="container">
         <div id="home-content" class="home-content">
             <h2>Bem-vindo à TechStore!</h2>
-            <p>Sua loja inline de produtos de tecnologia com os melhores preços e atendimento.</p>
+            <p>Sua loja online de produtos de tecnologia com os melhores preços e atendimento.</p>
             <p>Navegue por nossos produtos e aproveite as ofertas especiais!</p>
             <button id="see-products">Ver Produtos</button>
         </div>
@@ -38,9 +49,9 @@
             <div class="product">
                 <img src="img/notebook.jpg" alt="Laptop">
                 <h3>Laptop Ultra</h3>
-                <p>Laptop poente para todas as suas necessidades.</p>
+                <p>Laptop potente para todas as suas necessidades.</p>
                 <p class="price">R$ 3.499,00</p>
-                <button class="add-to-cart" data-id="2">Adicionar ao Carinho</button>
+                <button class="add-to-cart" data-id="2">Adicionar ao Carrinho</button>
             </div>
             
             <div class="product">
@@ -76,45 +87,57 @@
             </div>
             <div id="cart-total" style="display:none;">
                 <p><strong>Total: </strong><span id="total-price">R$ 0,00</span></p>
-                <button id="checkout">Finlizar Compra</button>
+                <button id="checkout">Finalizar Compra</button>
             </div>
         </div>
     </div>
 
     <footer>
-        <p>TechStore &copy; 2025 - Todos os diritos reservados</p>
+        <p>TechStore &copy; 2025 - Todos os direitos reservados</p>
     </footer>
 
     <script>
         let cartItems = 0;
         let cartProducts = [];
+
         const products = [
             { id: 1, name: "Smartphone X", price: 1999.00 },
-            { id: 2, name: "Laptop Ultra", price: 3949.00 },
-            { id: 3, name: "Fones de Ouvido Bluetooth", price: 29.90 }
+            { id: 2, name: "Laptop Ultra", price: 3499.00 },
+            { id: 3, name: "Fones de Ouvido Bluetooth", price: 299.90 }
         ];
 
-        window.onload = function() {
+        // Recuperar carrinho do localStorage
+        if (localStorage.getItem('cartProducts')) {
+            cartProducts = JSON.parse(localStorage.getItem('cartProducts'));
+            cartItems = cartProducts.length;
+            document.getElementById('cart-link').textContent = `Carrinho (${cartItems})`;
+        }
+
+        window.onload = function () {
             document.getElementById('home-content').style.display = 'block';
             document.querySelector('.products').style.display = 'none';
             document.getElementById('contact-form').style.display = 'none';
             document.getElementById('cart-content').style.display = 'none';
+            updateCart();
         };
 
-        document.getElementById('home-link').addEventListener('click', function(e) {
+        document.getElementById('home-link').addEventListener('click', function (e) {
             e.preventDefault();
             alert('Página em manutenção!');
         });
 
-        document.getElementById('products-link').addEventListener('click', function(e) {
-            e.preventDefault();
+        document.getElementById('products-link').addEventListener('click', showProducts);
+        document.getElementById('see-products').addEventListener('click', showProducts);
+
+        function showProducts(e) {
+            if (e) e.preventDefault();
             document.getElementById('home-content').style.display = 'none';
             document.getElementById('contact-form').style.display = 'none';
             document.getElementById('cart-content').style.display = 'none';
             document.querySelector('.products').style.display = 'flex';
-        });
+        }
 
-        document.getElementById('contact-link').addEventListener('click', function(e) {
+        document.getElementById('contact-link').addEventListener('click', function (e) {
             e.preventDefault();
             document.getElementById('home-content').style.display = 'none';
             document.getElementById('contact-form').style.display = 'block';
@@ -122,7 +145,7 @@
             document.querySelector('.products').style.display = 'none';
         });
 
-        document.getElementById('cart-link').addEventListener('click', function(e) {
+        document.getElementById('cart-link').addEventListener('click', function (e) {
             e.preventDefault();
             document.getElementById('home-content').style.display = 'none';
             document.getElementById('contact-form').style.display = 'none';
@@ -130,28 +153,10 @@
             document.querySelector('.products').style.display = 'none';
         });
 
-        document.getElementById('see-products').addEventListener('click', function() {
-            document.getElementById('home-content').style.display = 'none';
-            document.getElementById('contact-form').style.display = 'none';
-            document.getElementById('cart-content').style.display = 'none';
-            document.querySelector('.products').style.display = 'flex';
-        });
-
-
-
         document.querySelectorAll('.add-to-cart').forEach(button => {
             button.addEventListener('click', function () {
                 const productId = parseInt(this.getAttribute('data-id'));
-
-                if (productId === 3) {
-                    cartItems++;
-                    const product = products.find(p => p.id === productId);
-                    cartProducts.push(product);
-                    document.getElementById('cart-link').textContent = `Carrinho (${cartItems})`;
-                    updateCart();
-                } else {
-                    addToCart(productId);
-                }
+                addToCart(productId);
             });
         });
 
@@ -160,6 +165,7 @@
             if (product) {
                 cartItems++;
                 cartProducts.push(product);
+                localStorage.setItem('cartProducts', JSON.stringify(cartProducts));
                 document.getElementById('cart-link').textContent = `Carrinho (${cartItems})`;
                 updateCart();
                 alert(`${product.name} adicionado ao carrinho!`);
@@ -171,13 +177,13 @@
             const emptyCart = document.getElementById('empty-cart');
             const cartTotal = document.getElementById('cart-total');
 
+            while (cartItemsContainer.children.length > 1) {
+                cartItemsContainer.removeChild(cartItemsContainer.lastChild);
+            }
+
             if (cartProducts.length > 0) {
                 emptyCart.style.display = 'none';
                 cartTotal.style.display = 'block';
-
-                while (cartItemsContainer.children.length > 1) {
-                    cartItemsContainer.removeChild(cartItemsContainer.lastChild);
-                }
 
                 let total = 0;
                 cartProducts.forEach(product => {
@@ -198,14 +204,15 @@
             }
         }
 
-        document.getElementById('submit-form').addEventListener('click', function(e) {
+        document.getElementById('submit-form').addEventListener('click', function (e) {
             e.preventDefault();
             const email = document.getElementById('email').value;
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-            if (email.indexOf('@') > 0) {
+            if (emailRegex.test(email)) {
                 alert('Formulário enviado com sucesso!');
             } else {
-                alert('Por favor, insira um email válido');
+                alert('Por favor, insira um email válido.');
             }
         });
 
@@ -213,7 +220,8 @@
             alert('Compra finalizada! Obrigado por escolher a TechStore.');
             cartItems = 0;
             cartProducts = [];
-            document.getElementById('cart-link').textContent = `Carrinho (${cartItems})`;
+            localStorage.removeItem('cartProducts');
+            document.getElementById('cart-link').textContent = `Carrinho (0)`;
             updateCart();
         });
     </script>
